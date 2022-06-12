@@ -1,0 +1,206 @@
+%-----------------------------------------------------------------------------%
+\chapter{PEMBAHASAN}
+%-----------------------------------------------------------------------------%
+\section{Dataset}
+Data yang kami gunakan berupa hasil rontgen 13.808 pasien, yang terdiri dari hasil rontgen 10.192 pasien yang negatif COVID-19 dan 3.616 pasien yang positif COVID-19. Setiap gambar memiliki label "Positive" atau "Negative", yang menandakan apakah pasien tersebut terjangkit penyakit COVID-19 atau tidak.
+
+Gambar \ref{positif covid} merupakan contoh hasil rontgen pasien positif COVID-19, sedangkan gambar \ref{negatif covid} merupakan contoh hasil rontgen pasien negatif COVID-19.
+
+\begin{figure}
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.6\linewidth]{pics/COVID-11.png}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.6\linewidth]{pics/COVID-12.png}
+\end{subfigure}
+
+\caption{Contoh Hasil Rontgen Pasien Positif COVID-19}
+\label{positif covid}
+\end{figure}
+
+\begin{figure}
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.6\linewidth]{pics/Normal-11.png}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.6\linewidth]{pics/Normal-12.png}
+\end{subfigure}
+\caption{Contoh hasil Rontgen Pasien Negatif COVID-19}
+\label{negatif covid}
+\end{figure}
+
+Semua gambar kami memiliki pewarnaan \textit{grayscale} dengan ukuran $299\times299$ piksel. Gambar kami sudah cukup tertata, walaupun ada variasi dalam hal penerangan dan tata letaknya seperti pada gambar \ref{var tata letak} dan gambar \ref{gelap terang}.
+
+\begin{figure}
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.6\linewidth]{pics/COVID-481.png}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.6\linewidth]{pics/COVID-950.png}
+\end{subfigure}%
+\caption{Contoh Variasi Tata Letak}
+\label{var tata letak}
+\end{figure}
+
+\begin{figure}
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.6\linewidth]{pics/COVID-1783.png}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.6\linewidth]{pics/COVID-698.png}
+\end{subfigure}
+\caption{Contoh Gambar yang Gelap (kiri) dan Kurang Jelas (kanan)}
+\label{gelap terang}
+\end{figure}
+
+\section{Preprocessing}
+Sebelum menggunakan data untuk membangun model, kami melakukan preprocessing pada dataset. Preprocessing yang kita lakukan adalah mengubah gambar menjadi array yang berisi integer dari $0$ sampai $255$. Ini adalah nilai yang menandakan tingkat kecerahan tiap piksel dalam gambar, dimana nilai yang besar berkorespondensi dengan piksel yang cerah.
+
+Selain itu, kita juga mengubah label tiap gambar menjadi integer $0$ atau $1$, dimana label "Negative" dipetakan ke $0$ dan "Positive" ke $1$.
+
+Kami juga melakukan \textit{down sampling} data set, sehingga jumlah kasus positif dengan kasus negatif memiliki perbandingan 1:1 (lihat gambar \ref{downsampling}). Setelah itu, kami juga mempartisi dataset yang sudah di-\textit{down sampling} menjadi 3 bagian, yaitu \textit{training data, validation data}, dan \textit{test data} dengan rasio 70\%, 15\%, 15\% terhadap data total secara berurutan (lihat tabel \ref{train-val-test})
+
+\begin{table}[!ht]
+    \centering
+
+    \begin{tabular}{|l|l|l|}
+    \hline
+        Dataset & Jumlah & Rasio (\%) \\ \hline
+        Training data & 5062 & 70\% \\ \hline
+        Validation data & 1085 & 15\% \\ \hline
+        Test data & 1085 & 15\% \\ \hline
+    \end{tabular}
+
+        \caption{Detail Partisi Dataset}
+        
+        \label{train-val-test}
+\end{table}
+
+
+
+\begin{figure}
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{pics/downsampling1.PNG}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{pics/downsampling2.PNG}
+\end{subfigure}
+
+\caption{Kiri: Jumlah Tiap Kasus Sebelum Downsampling, Kanan: Jumlah Tiap Kasus Sebelum Downsampling}
+\label{downsampling}
+\end{figure}
+
+\section{Pembuatan Model}
+
+\begin{figure}[h!]
+  \centering  \fbox{\includegraphics[width=0.7\textwidth]{pics/Convolutional_netweork.png}}
+  \caption{Keluaran yang Dihasilkan Setiap layernya}
+  \label{detail cnn}
+\end{figure}
+
+
+
+Pada makalah ini, kami gunakan model CNN sederhana untuk mengklasifikasikan kasus  positif COVID-19 dan negatif COVID-19 dari kumpulan gambar rontgen. gambar \ref{alur CNN} merupakan diagram model, dan gambar \ref{detail cnn} adalah tabel mengenai detail keluaran tiap layernya.  Model ini memiliki 2 pasang layer konvolusi dan 1 \textit{fully-connected layer}. setiap layer konvolusi terdapat 32 filter dengan  ukuran $3\times 3$. Kami juga menerapkan layer Max Pooling $2\times 2$ untuk setiap layer konvolusinya. pada \textit{fully-connected layer} diterapkan juga regularisasi dropout sebesar 50\%. Selain itu, kami juga menerapkan fungsi aktivasi Relu pada setiap layer Konvolusi dan \textit{fully-connected layer}-nya. Pada layer prediksi, kami mengunakan fungsi aktivasi softmax karena model mengklasifikasi 2 kelas, positif COVID-19 dan negatif COVID-19.
+
+\begin{figure}[h!]
+  \centering
+  \fbox{\includegraphics[width=1\textwidth]{pics/Picture2.png}}
+  \caption{Diagram Model}
+  \label{alur CNN}
+\end{figure}
+
+Model akan memprediksikan kelas dari data masukan (\textit{input} dengan melihat keluaran tertinggi pada layer prediksinya.
+
+
+\begin{table}[!ht]
+    \centering
+    \begin{tabular}{|l|l|}
+    \hline
+        Parameters & Nilai \\ \hline
+        Cost Function & Cross-Entropy loss function \\ \hline
+        Laju pembelajaran (awal) & 0.001 \\ \hline
+        Ukuran batch & 64 \\ \hline
+        Optimizer & Adam \\ \hline
+        Max epochs & 50 \\ \hline
+        Execution enviroment & GPU \\ \hline
+    \end{tabular}
+    \caption{Paramater yang Digunakan Dalam Melatih Model}
+    \label{tabel1}
+
+\end{table}
+
+Model ini mengunakan fungsi \textit{Cross-Entropy Loss function sebagai} fungsi \textit{loss}-nya, dan algortima Adam sebagai \textit{optimizer}. Lebih lanjut lagi, model ini dilatih dengan menggunakan parameter pada tabel \ref{tabel1}.
+
+\section{Analisis Performa}
+Gambar \ref{his_acc} dan gambar \ref{his_loss} merupakan grafik akurasi dan loss dari model pada \textit{training data}, dan \textit{validation data} selama proses \textit{training} berlangsung (11 epochs).
+Berdasarkan gambar \ref{his_acc} , akurasi (\textit{accuracy}) model kami terus bertambah baik  (mendekati 1) seiring bertambahnya epoch baik pada \textit{training data}, maupun \textit{validation data}. hal ini menunjukkan bahwa model tidaklah \textit{overfitting}.
+
+Nilai loss model pada gambar \ref{his_loss} dari penggunaan fungsi \textit{Cross-Entropy Loss function} dan nilai loss model kami terus bertambah baik (menurun mendekati 0) seiring bertambahnya epoch.
+
+Kami mengevaluasi model kami dengan berbagai macam metric, seperti \textit{accruracy, precision, recall,} dan \textit{f1-score}, serta dengan menggunakan \textit{confussion matrix} terhadap data test.
+
+\begin{figure}[h!]
+  \centering
+  \fbox{\includegraphics[width=0.5\textwidth]{pics/his_acc.png}}
+  \caption{Grafik Akurasi Model dari Setiap Epoch Terhadap Data Train dan Data Validasi}
+  \label{his_acc}
+\end{figure}
+
+
+\begin{figure}
+  \centering
+  \fbox{\includegraphics[width=0.5\textwidth]{pics/loss_acc.png}}
+  \caption{Grafik Loss Model dari Setiap Epoch Terhadap Data Train dan Data Validasi}
+  \label{his_loss}
+\end{figure}
+
+
+
+\textit{Confussion matrix} terdiri dari empat karakteristik dasar (angka) yang digunakan untuk menentukan metric pengukuran pengklasifikasi, yaitu
+\begin{itemize}
+    \item True Negative (TN)
+    merepresentasikan jumlah orang yang diklasifikasikan dengan benar bahwa orang tersebut negatif COVID-19.
+    \item True Positive (TP)
+    merepresentasikan jumlah orang yang diklasifikasikan dengan benar bahwa orang tersebut positif COVID-19.
+    \item False Negative (FN)
+    merepresentasikan jumlah orang yang diklasifikasikan negatif COVID-19 tetapi sebenarnya orang tersebut positif COVID-19.
+    \item False Positive (FP)
+    merepresentasikan jumlah orang yang diklasifikasikan positif COVID-19 tetapi sebenarnya orang tersebut negatif COVID-19.
+\end{itemize}
+
+\begin{figure}[h!]
+  \centering
+  \fbox{\includegraphics[width=0.5\textwidth]{pics/testdata.png}}
+  \caption{\textit{Confussion Matrix} Terhadap Data Test (0 = Negatif, 1 = Positif)}
+  \label{cm}
+\end{figure}
+
+\textit{Confussion Matrix} pada gambar \ref{cm} menunjukkan bahwa model kami memprediksi benar 524 orang yang negatif COVID-19 dan 496 orang yang positif COVID-19, sedangkan model kami salah memprediksi 49 orang yang negatif COVID-19 (diprediksi positif oleh model kami) dan 16 orang yang positif COVID-19 (diprediksi negatif oleh model kami).
+
+Selanjutnya nilai TN (524), TP (496), FN (49), dan FP (16) digunakan untuk menghitung metric \textit{accruracy, precision, recall,} dan \textit{f1-score}.
+
+\begin{figure}
+  \centering
+  \fbox{\includegraphics[width=0.7\textwidth]{pics/class_report_test.png}}
+  \caption{Evaluasi Model dengan metric \textit{accruracy, precision, recall,} dan \textit{f1-score}}
+  \label{report}
+\end{figure}
+
+Dari informasi \textit{accruracy, precision, recall,} dan \textit{f1-score} pada gambar \ref{report}, dapat disimpulkan bahwa model kami sudah cukup baik dalam melakukan klasifikasi positif dan negatif COVID-19 dari hasil rontgen paru-paru karena nilai masing-masing metric tersebut mendekati 1.
+
+
